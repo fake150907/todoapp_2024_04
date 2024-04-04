@@ -96,6 +96,44 @@ const NewTodoForm = ({ todosState }) => {
   );
 };
 
+const ModifyTodoForm = ({ todosState, status }) => {
+  const onSubmit = (e) => {
+    e.preventDefault();
+
+    const form = e.currentTarget;
+
+    form.content.value = form.content.value.trim();
+
+    if (form.content.value.length == 0) {
+      alert('할 일 써');
+      form.content.focus();
+      return;
+    }
+
+    todosState.modifyTodo(status.todoId, form.content.value);
+    form.content.value = '';
+    form.content.focus();
+  };
+
+  return (
+    <>
+      <form onSubmit={(e) => onSubmit(e)} className="tw-flex tw-flex-col tw-p-4 tw-gap-2">
+        <TextField
+          minRows={3}
+          maxRows={10}
+          multiline
+          name="content"
+          autoComplete="off"
+          label="수정 할 내용을 작성"
+        />
+        <Button variant="contained" className="tw-font-bold" type="submit">
+          수정
+        </Button>
+      </form>
+    </>
+  );
+};
+
 const TodoListItem = ({ todo, index, openDrawer }) => {
   return (
     <>
@@ -177,9 +215,9 @@ function useEditTodoModalStatus() {
   };
 }
 
-function TodoOptionDrawer({ status }) {
+function TodoOptionDrawer({ status, todosState }) {
   const editTodoModalStatus = useEditTodoModalStatus();
-
+  const [removeTodoStatus, setRemoveTodoStatus] = React.useState(false);
   return (
     <>
       <SwipeableDrawer anchor="top" open={status.opened} onClose={status.close} onOpen={() => {}}>
@@ -195,7 +233,11 @@ function TodoOptionDrawer({ status }) {
             <span>수정</span>
             <FaPenToSquare className="block tw-mt-[-5px]" />
           </ListItemButton>
-          <ListItemButton className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center">
+          <ListItemButton
+            onClick={() => {
+              todosState.removeTodo;
+            }}
+            className="tw-p-[15px_20px] tw-flex tw-gap-2 tw-items-center">
             <span>삭제</span>
             <FaTrash className="block tw-mt-[-5px]" />
           </ListItemButton>
@@ -205,7 +247,9 @@ function TodoOptionDrawer({ status }) {
         open={editTodoModalStatus.opened}
         onClose={editTodoModalStatus.close}
         className="tw-flex tw-justify-center tw-items-center">
-        <div className="tw-bg-white tw-p-10 tw-rounded-[20px]">안녕</div>
+        <div className="tw-bg-white tw-p-10 tw-rounded-[20px]">
+          <ModifyTodoForm todosState={todosState} status={status} />
+        </div>
       </Modal>
     </>
   );
@@ -216,7 +260,7 @@ const TodoList = ({ todosState }) => {
 
   return (
     <>
-      <TodoOptionDrawer status={todoOptionDrawerStatus} />
+      <TodoOptionDrawer status={todoOptionDrawerStatus} todosState={todosState} />
       <nav>
         할 일 갯수 : {todosState.todos.length}
         <ul>
