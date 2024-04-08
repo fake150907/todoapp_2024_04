@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { RecoilRoot, atom, selector, useRecoilState, useRecoilValue } from 'recoil';
 import { ThemeProvider } from '@mui/material/styles';
 import classNames from 'classnames';
 import {
@@ -27,12 +28,25 @@ import { FaPenToSquare } from 'react-icons/fa6';
 import RootTheme from './theme';
 import dateToStr from './dateUtil';
 
+const todosAtom = atom({
+  key: 'app/todosAtom',
+  default: [],
+});
+
+const lastTodoIdAtom = atom({
+  key: 'app/lastTodoIdAtom',
+  default: 0,
+});
+
 function useTodosStatus() {
-  const [todos, setTodos] = React.useState([]);
-  const lastTodoIdRef = React.useRef(0);
+  const [todos, setTodos] = useRecoilState(todosAtom);
+  // const [todos, setTodos] = React.useState([]);
+  const [lastTodoId, setLastTodoId] = useRecoilState(lastTodoIdAtom);
+  const lastTodoIdRef = React.useRef(lastTodoId);
 
   const addTodo = (newContent) => {
     const id = ++lastTodoIdRef.current;
+    setLastTodoId(id);
 
     const newTodo = {
       id,
@@ -434,9 +448,11 @@ export default function themeApp() {
   const theme = RootTheme();
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
-      <App />
-    </ThemeProvider>
+    <RecoilRoot>
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <App />
+      </ThemeProvider>
+    </RecoilRoot>
   );
 }
